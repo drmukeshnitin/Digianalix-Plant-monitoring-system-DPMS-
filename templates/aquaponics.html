@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Aquaponics Monitoring</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .dashboard { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .metric-card { 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            padding: 15px; 
+            background-color: #f9f9f9;
+        }
+        .chart-container { position: relative; height: 300px; width: 100%; }
+        h2 { color: #3498db; }
+    </style>
+</head>
+<body>
+    <h1>Aquaponics Monitoring Dashboard</h1>
+    <a href="/">← Back to main menu</a>
+    
+    <div class="dashboard">
+        <div class="metric-card">
+            <h3>pH Level</h3>
+            <div class="chart-container">
+                <canvas id="phChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Temperature (°C)</h3>
+            <div class="chart-container">
+                <canvas id="tempChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Humidity (%)</h3>
+            <div class="chart-container">
+                <canvas id="humidityChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Water Level (%)</h3>
+            <div class="chart-container">
+                <canvas id="waterLevelChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Dissolved Oxygen (mg/L)</h3>
+            <div class="chart-container">
+                <canvas id="doChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Ammonia (mg/L)</h3>
+            <div class="chart-container">
+                <canvas id="ammoniaChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Nitrate (mg/L)</h3>
+            <div class="chart-container">
+                <canvas id="nitrateChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize charts
+        const charts = {};
+        const chartConfigs = {
+            'phChart': { label: 'pH', min: 6, max: 8, unit: '' },
+            'tempChart': { label: 'Temperature', min: 15, max: 30, unit: '°C' },
+            'humidityChart': { label: 'Humidity', min: 30, max: 90, unit: '%' },
+            'waterLevelChart': { label: 'Water Level', min: 0, max: 100, unit: '%' },
+            'doChart': { label: 'Dissolved Oxygen', min: 0, max: 10, unit: 'mg/L' },
+            'ammoniaChart': { label: 'Ammonia', min: 0, max: 2, unit: 'mg/L' },
+            'nitrateChart': { label: 'Nitrate', min: 0, max: 60, unit: 'mg/L' }
+        };
+
+        // Initialize all charts
+        Object.keys(chartConfigs).forEach(chartId => {
+            const ctx = document.getElementById(chartId).getContext('2d');
+            charts[chartId] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: chartConfigs[chartId].label,
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            min: chartConfigs[chartId].min,
+                            max: chartConfigs[chartId].max
+                        }
+                    },
+                    maintainAspectRatio: false
+                }
+            });
+        });
+
+        // Function to fetch and update data
+        function updateData() {
+            fetch('/api/aquaponics/data')
+                .then(response => response.json())
+                .then(data => {
+                    // Process data for each chart
+                    const timestamps = data.map(item => {
+                        const date = new Date(item.timestamp);
+                        return date.toLocaleTimeString();
+                    }).reverse();
+                    
+                    // Update each chart
+                    Object.keys(charts).forEach(chartId => {
+                        const keyMap = {
+                            'phChart': 'ph',
+                            'tempChart': 'temperature',
+                            'humidityChart': 'humidity',
+                            'waterLevelChart': 'water_level',
+                            'doChart': 'dissolved_oxygen',
+                            'ammoniaChart': 'ammonia',
+                            'nitrateChart': 'nitrate'
+                        };
+                        
+                        const key = keyMap[chartId];
+                        const chartData = data.map(item => item[key]).reverse();
+                        charts[chartId].data.labels = timestamps;
+                        charts[chartId].data.datasets[0].data = chartData;
+                        charts[chartId].update();
+                    });
+                });
+        }
+
+        // Update data initially and every 5 seconds
+        updateData();
+        setInterval(updateData, 5000);
+    </script>
+</body>
+</html>

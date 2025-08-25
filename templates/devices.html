@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connected Devices</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #2c3e50; }
+        .device-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .device-table th, .device-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .device-table th { background-color: #f2f2f2; }
+        .device-table tr:nth-child(even) { background-color: #f9f9f9; }
+        .online { color: green; }
+        .offline { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Connected Devices</h1>
+    <a href="/">← Back to main menu</a>
+    
+    <h2>Registered Devices</h2>
+    <table class="device-table">
+        <thead>
+            <tr>
+                <th>Device ID</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>System</th>
+                <th>Last Seen</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="devices-list">
+            <!-- Devices will be populated here -->
+        </tbody>
+    </table>
+
+    <h2>How to Send Data</h2>
+    <p>External devices can send data to the following endpoints:</p>
+    
+    <h3>For Hydroponics Systems:</h3>
+    <code>POST http://[server-ip]:5000/api/data/hydroponics</code>
+    <p>Required JSON format:</p>
+    <pre>
+{
+    "device_id": "unique-device-id",
+    "ph": 6.2,
+    "temperature": 22.5,
+    "device_name": "Optional Device Name",
+    "device_type": "sensor",
+    "humidity": 65.0,
+    "water_level": 75.0,
+    "light_intensity": 8000.0,
+    "ec": 1.8
+}
+    </pre>
+    
+    <h3>For Aquaponics Systems:</h3>
+    <code>POST http://[server-ip]:5000/api/data/aquaponics</code>
+    <p>Required JSON format:</p>
+    <pre>
+{
+    "device_id": "unique-device-id",
+    "ph": 7.0,
+    "temperature": 24.0,
+    "device_name": "Optional Device Name",
+    "device_type": "sensor",
+    "humidity": 70.0,
+    "water_level": 80.0,
+    "dissolved_oxygen": 6.5,
+    "ammonia": 0.5,
+    "nitrate": 25.0
+}
+    </pre>
+
+    <script>
+        function updateDevicesList() {
+            fetch('/api/devices')
+                .then(response => response.json())
+                .then(devices => {
+                    const devicesList = document.getElementById('devices-list');
+                    devicesList.innerHTML = '';
+                    
+                    devices.forEach(device => {
+                        const lastSeen = new Date(device.last_seen);
+                        const now = new Date();
+                        const minutesAgo = Math.floor((now - lastSeen) / 60000);
+                        const isOnline = minutesAgo < 5; // Consider online if seen in last 5 minutes
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${device.device_id}</td>
+                            <td>${device.device_name}</td>
+                            <td>${device.device_type}</td>
+                            <td>${device.system_type}</td>
+                            <td>${lastSeen.toLocaleString()}</td>
+                            <td class="${isOnline ? 'online' : 'offline'}">${isOnline ? 'Online' : `Offline (${minutesAgo} min ago)`}</td>
+                        `;
+                        
+                        devicesList.appendChild(row);
+                    });
+                });
+        }
+        
+        // Update devices list initially and every 30 seconds
+        updateDevicesList();
+        setInterval(updateDevicesList, 30000);
+    </script>
+</body>
+</html>

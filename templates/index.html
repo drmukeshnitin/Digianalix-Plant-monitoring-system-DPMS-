@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Digianalix Plant Growth Monitoring System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .system-card { 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin: 10px; 
+            width: 300px; 
+            text-align: center; 
+            display: inline-block;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .system-card:hover { transform: scale(1.05); }
+        h1 { color: #2c3e50; }
+        .device-status {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Digianalix Plant Growth Monitoring System</h1>
+    <p>Select a system to monitor:</p>
+    
+    <div class="system-card" onclick="location.href='/hydroponics'">
+        <h2>Hydroponics</h2>
+        <p>Monitor nutrient solutions and plant growth without soil</p>
+    </div>
+    
+    <div class="system-card" onclick="location.href='/aquaponics'">
+        <h2>Aquaponics</h2>
+        <p>Monitor integrated fish and plant ecosystem</p>
+    </div>
+    
+    <div class="system-card" onclick="location.href='/devices'">
+        <h2>Connected Devices</h2>
+        <p>View and manage external data sources</p>
+    </div>
+    
+    <div class="device-status">
+        <h2>System Status</h2>
+        <p>Server running on: <strong id="server-ip">Loading...</strong></p>
+        <p>External devices can send data to API endpoints</p>
+        <p>View the <a href="/devices">Devices page</a> for connection instructions</p>
+    </div>
+
+    <script>
+        // Display the server IP address
+        document.getElementById('server-ip').textContent = window.location.host;
+    </script>
+</body>
+</html>
