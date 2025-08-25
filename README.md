@@ -148,4 +148,10 @@ For production deployment, consider:
 
     📞 Support
 
-If you have any questions or issues, please open an issue on GitHub or contact the development team.
+This project is licensed under the MIT License.
+
+For any issues or suggestions, please reach out to:
+
+    Author: Dr Mukesh nitin
+    Email: drrmukeshnitin@gmail.com
+    https://github.com/drmukeshnitin/Digianalix-Plant-monitoring-system-DPMS-/tree/main
